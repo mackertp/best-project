@@ -14,7 +14,7 @@ import javafx.stage.*;
 import javafx.util.Duration;
 
 /**
- * Example of displaying a splash page for a standalone JavaFX application
+ * Splash page for loading in the msnbc data
  */
 
 public class GUI extends Application {
