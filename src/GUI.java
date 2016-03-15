@@ -132,7 +132,6 @@ public class GUI extends Application {
         initStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
         initStage.show();
     }
-
     public interface InitCompletionHandler {
         public void complete();
     }
