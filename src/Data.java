@@ -3,11 +3,14 @@ import java.util.Scanner;
 
 public class Data {
 
-    DataArray msnbcData;
+    private DataArray msnbcData;
+    private int linesProcessed; // represents how many lines are loaded
+    private int totalLines = 989818;
+    private int categories = 17;
     
     public Data(File dataFile) throws FileNotFoundException{
 
-        msnbcData = new DataArray(989818, 17);
+        msnbcData = new DataArray(totalLines, categories);
         int lineNum = 0;
 
         Scanner file = new Scanner(dataFile);
@@ -22,7 +25,14 @@ public class Data {
             }
         }
 
+    }
 
+    public int getLinesProcessed(){
+        return linesProcessed;
+    }
+
+    public int getTotalLines(){
+        return totalLines;
     }
 }
 
