@@ -3,6 +3,8 @@ import java.util.Scanner;
 
 public class Data {
 
+    DataArray msnbcData;
+    
     public Data(File dataFile) throws FileNotFoundException{
 
         int[][] dataArray = new int[989818][17];
@@ -11,7 +13,6 @@ public class Data {
         Scanner file = new Scanner(dataFile);
 
         while (file.hasNextLine()){
-
             String line = file.nextLine();
             lineNum+=1;
             
@@ -20,6 +21,8 @@ public class Data {
                 dataArray[lineNum][view] += 1;
             }
         }
+
+        msnbcData.setData(dataArray);
     }
 }
 
