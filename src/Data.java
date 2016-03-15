@@ -20,7 +20,6 @@ public class Data {
                 dataArray[lineNum][view] += 1;
             }
         }
-
     }
 }
 
