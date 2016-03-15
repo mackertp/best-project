@@ -86,7 +86,6 @@ public class GUI extends Application {
         );
         new Thread(friendTask).start();
     }
-
     private void showMainStage(
             ReadOnlyObjectProperty<ObservableList<String>> friends
     ) {
