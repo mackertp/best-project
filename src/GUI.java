@@ -37,9 +37,7 @@ public class GUI extends Application {
 
     @Override
     public void init() {
-        ImageView splash = new ImageView(new Image(
-                SPLASH_IMAGE
-        ));
+        ImageView splash = new ImageView(new Image(SPLASH_IMAGE));
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH+210);
         progressText = new Label("importing data from msnbc . . .");
@@ -79,11 +77,7 @@ public class GUI extends Application {
             }
         };
 
-        showSplash(
-                initStage,
-                friendTask,
-                () -> showMainStage(friendTask.valueProperty())
-        );
+        showSplash(initStage, friendTask, () -> showMainStage(friendTask.valueProperty()));
         new Thread(friendTask).start();
     }
 
@@ -135,6 +129,6 @@ public class GUI extends Application {
     }
 
     public interface InitCompletionHandler {
-        public void complete();
+        void complete();
     }
 }
