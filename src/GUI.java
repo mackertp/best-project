@@ -63,7 +63,7 @@ public class GUI extends Application {
     private ProgressBar loadProgress;          // need this to show a loading bar
     private Label progressText;                // give text to the user to see what is being loaded
     private Stage mainStage;
-    private Scene scene1;
+    private Scene scene1, scene2, scene3, scene4, scene5, scene6;
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 400;
 
@@ -131,6 +131,10 @@ public class GUI extends Application {
          * array. From here the user will be able to select a query and progress forward through the program.
          */
 
+        mainStage = new Stage();
+        mainStage.setTitle("msnbc data queries");
+
+
         ObservableList<String> options =					// creating options for the queries
                 FXCollections.observableArrayList(
                         "Are there more than ____ users who looked at X",
@@ -148,12 +152,27 @@ public class GUI extends Application {
         search.setMaxWidth(100);
         search.setMinWidth(100);
         search.setOnAction(e -> {
+            String selection = querySel.getSelectionModel().getSelectedItem().toString();
+            if (selection.equals("Are there more than ____ users who looked at X")){
+                mainStage.setScene(scene2);
+            }
+            else if (selection.equals("What percent of users looked at X")){
+                mainStage.setScene(scene3);
+            }
+            else if (selection.equals("Are there more users who looked at X than Y")){
+                mainStage.setScene(scene4);
+            }
+            else if (selection.equals("How many users viewed X ___ number of times")){
+                mainStage.setScene(scene5);
+            }
+            else if (selection.equals("What percent of users looked at X more than Y")){
+                mainStage.setScene(scene6);
+            }
         });
 
-        ImageView logo = new ImageView(new Image(MAIN_LOGO));
+        // ----------------- main screen ------------------ //
 
-        mainStage = new Stage();
-        mainStage.setTitle("msnbc data queries");
+        ImageView logo = new ImageView(new Image(MAIN_LOGO));
 
         TilePane selQuery = new TilePane(Orientation.HORIZONTAL);		// make a pane to make GUI look sexy
         selQuery.getChildren().addAll(querySel, search);
@@ -167,8 +186,66 @@ public class GUI extends Application {
         layout1.getChildren().addAll(logo, select);
         layout1.setAlignment(Pos.CENTER);
 
-        mainStage.getIcons().add(new Image(APPLICATION_ICON));
         scene1 = new Scene(layout1, 900, 600);
+
+        // ----------------- query1 screen ----------------- //
+
+        Button returnMain1 = new Button("return");
+        returnMain1.setOnAction(e -> {mainStage.setScene(scene1);});
+
+        VBox layout2 = new VBox();
+        layout2.getChildren().addAll(returnMain1);
+        layout2.setAlignment(Pos.CENTER);
+
+        scene2 = new Scene(layout2, 900, 600);
+
+        // ----------------- query2 screen ----------------- //
+
+        Button returnMain2 = new Button("return");
+        returnMain2.setOnAction(e -> {mainStage.setScene(scene1);});
+
+        VBox layout3 = new VBox();
+        layout3.getChildren().add(returnMain2);
+        layout3.setAlignment(Pos.CENTER);
+
+        scene3 = new Scene(layout3, 900, 600);
+
+        // ----------------- query3 screen ----------------- //
+
+        Button returnMain3 = new Button("return");
+        returnMain3.setOnAction(e -> {mainStage.setScene(scene1);});
+
+        VBox layout4 = new VBox();
+        layout4.getChildren().add(returnMain3);
+        layout4.setAlignment(Pos.CENTER);
+
+        scene4 = new Scene(layout4, 900, 600);
+
+        // ----------------- query4 screen ----------------- //
+
+        Button returnMain4 = new Button("return");
+        returnMain4.setOnAction(e -> {mainStage.setScene(scene1);});
+
+        VBox layout5 = new VBox();
+        layout5.getChildren().add(returnMain4);
+        layout5.setAlignment(Pos.CENTER);
+
+        scene5 = new Scene(layout5, 900, 600);
+
+        // ----------------- query5 screen ----------------- //
+
+        Button returnMain5 = new Button("return");
+        returnMain5.setOnAction(e -> {mainStage.setScene(scene1);});
+
+        VBox layout6 = new VBox();
+        layout6.getChildren().add(returnMain5);
+        layout6.setAlignment(Pos.CENTER);
+
+        scene6 = new Scene(layout6, 900, 600);
+
+        // ---------------- set first scene --------------- //
+
+        mainStage.getIcons().add(new Image(APPLICATION_ICON));
         mainStage.setScene(scene1);
         mainStage.show();
     }
