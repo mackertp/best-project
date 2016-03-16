@@ -1,8 +1,22 @@
+/**
+ * ---- Main GUI class for MSNBC Threading project ----
+ *
+ * This class contains the GUI for the project, it incorporates a loading screen while
+ * the data from the msnbc file is loaded into the 2d array used to store the data. Then
+ * a home screen is brought up which allows the user to select a query to perform on the
+ * data set. Each query has it's own scene that will be used to get the user's answer and
+ * present it to them.
+ *
+ * @author Preston Mackert
+ * @author Robert Bofinger
+ *
+ * *** created code for the loading screen based from github user jewelsea
+ *      url: https://gist.github.com/jewelsea/2305098
+ *
+ */
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.collections.*;
 import javafx.concurrent.*;
 import javafx.geometry.*;
 import javafx.scene.Scene;
@@ -12,12 +26,18 @@ import javafx.scene.image.*;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Duration;
+import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Splash page for loading in the msnbc data
  */
 
 public class GUI extends Application {
+
+    private static Data data;                 // the loaded msnbc data
+    private static final int users = 989818;  // the total amount of users in the file
+    private static final int categories = 17; // the total amount of categories
 
     public static final String APPLICATION_ICON =
             "http://static.tvtropes.org/pmwiki/pub/images/new-msnbc-logo-781050.gif";
@@ -31,83 +51,62 @@ public class GUI extends Application {
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 400;
 
-    public static void main(String[] args) throws Exception {
-        launch(args);
-    }
+    public static void main(String[] args) throws Exception {launch(args);}
 
     @Override
     public void init() {
-        ImageView splash = new ImageView(new Image(
-                SPLASH_IMAGE
-        ));
+        ImageView splash = new ImageView(new Image(SPLASH_IMAGE));
         loadProgress = new ProgressBar();
         loadProgress.setPrefWidth(SPLASH_WIDTH+210);
         progressText = new Label("importing data from msnbc . . .");
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
-        splashLayout.setStyle("-fx-padding: 5; " + "-fx-background-color: white; " + "-fx-border-width:2; " + "-fx-border-color: " +
-                "linear-gradient(" + "to bottom, " + "blue, " + "derive(blue, 20%)" + ");");
+        splashLayout.setStyle("-fx-padding: 5; " + "-fx-background-color: white; " + "-fx-border-width:2; " +
+                "-fx-border-color: " + "linear-gradient(" + "to bottom, " + "blue, " + "#6666ff" + ");");
         splashLayout.setEffect(new DropShadow());
     }
 
     @Override
     public void start(final Stage initStage) throws Exception {
-        final Task<ObservableList<String>> friendTask = new Task<ObservableList<String>>() {
-            @Override
-            protected ObservableList<String> call() throws InterruptedException {
-                ObservableList<String> foundFriends =
-                        FXCollections.<String>observableArrayList();
-                ObservableList<String> availableFriends =
-                        FXCollections.observableArrayList(
-                                "Fili", "Kili", "Oin", "Gloin", "Thorin",
-                                "Dwalin", "Balin", "Bifur", "Bofur",
-                                "Bombur", "Dori", "Nori", "Ori"
-                        );
 
-                for (int i = 0; i < availableFriends.size(); i++) {
-                    Thread.sleep(400);
-                    updateProgress(i + 1, availableFriends.size());
-                    String nextFriend = availableFriends.get(i);
-                    foundFriends.add(nextFriend);
-                    updateMessage("Loading in user data...");
+        final Thread loadThread = new Thread() {           // anonymous thread to load data
+            public void run() {
+                try {
+                    File dataFile = new File("datafile.txt");
+                    data.loadData(dataFile);
                 }
-                Thread.sleep(400);
-                updateMessage("Data Retrieved");
-
-                return foundFriends;
+                catch (FileNotFoundException e){}         // do nothing
             }
         };
 
-        showSplash(
-                initStage,
-                friendTask,
-                () -> showMainStage(friendTask.valueProperty())
-        );
-        new Thread(friendTask).start();
-    }
+        final Task<Integer> progressbarTask = new Task<Integer>() {
+            public Integer call() {
+                while(data.getUsersProcessed() < data.getTotalUsers()){
+                    updateProgress(data.getUsersProcessed(), data.getTotalUsers());
+                    updateMessage("importing data from msnbc . . .");
+                }
+                return data.getTotalUsers();
+            }
+        };
 
-    private void showMainStage(
-            ReadOnlyObjectProperty<ObservableList<String>> friends
-    ) {
+        data = new Data(users, categories);
+
+        showSplash(initStage, progressbarTask, () -> showMainStage());
+        loadThread.start();            //progressbarThread.start();
+        new Thread(progressbarTask).start();
+    }
+    private void showMainStage() {
         mainStage = new Stage(StageStyle.DECORATED);
         mainStage.setTitle("My Friends");
-        mainStage.getIcons().add(new Image(
-                APPLICATION_ICON
-        ));
-
+        mainStage.getIcons().add(new Image(APPLICATION_ICON));
         final ListView<String> peopleView = new ListView<>();
-        peopleView.itemsProperty().bind(friends);
-
         mainStage.setScene(new Scene(peopleView));
         mainStage.show();
     }
 
-    private void showSplash(
-            final Stage initStage,
-            Task<?> task,
-            InitCompletionHandler initCompletionHandler
-    ) {
+    private void showSplash(final Stage initStage, Task<?> task, InitCompletionHandler initCompletionHandler) {
+
         progressText.textProperty().bind(task.messageProperty());
         loadProgress.progressProperty().bind(task.progressProperty());
         task.stateProperty().addListener((observableValue, oldState, newState) -> {
@@ -120,9 +119,8 @@ public class GUI extends Application {
                 fadeSplash.setToValue(0.0);
                 fadeSplash.setOnFinished(actionEvent -> initStage.hide());
                 fadeSplash.play();
-
                 initCompletionHandler.complete();
-            } // todo add code to gracefully handle other task states.
+            }
         });
 
         Scene splashScene = new Scene(splashLayout);
@@ -133,8 +131,7 @@ public class GUI extends Application {
         initStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
         initStage.show();
     }
-
     public interface InitCompletionHandler {
-        public void complete();
+        void complete();
     }
 }
