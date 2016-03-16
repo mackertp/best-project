@@ -2,7 +2,6 @@
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ObservableIntegerValue;
 import javafx.collections.*;
 import javafx.concurrent.*;
 import javafx.geometry.*;
@@ -14,18 +13,11 @@ import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Duration;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
 /**
  * Splash page for loading in the msnbc data
  */
 
 public class GUI extends Application {
-
-    private static Data data; // the loaded msnbc data
-    private static final int users = 989818; // the total amount of users in the file
-    private static final int categories = 17; // the total amount of categories
 
     public static final String APPLICATION_ICON =
             "http://static.tvtropes.org/pmwiki/pub/images/new-msnbc-logo-781050.gif";
@@ -55,49 +47,48 @@ public class GUI extends Application {
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
         splashLayout.setStyle("-fx-padding: 5; " + "-fx-background-color: white; " + "-fx-border-width:2; " + "-fx-border-color: " +
-                "linear-gradient(" + "to bottom, " + "blue, " + "#6666ff" + ");");
+                "linear-gradient(" + "to bottom, " + "blue, " + "derive(blue, 20%)" + ");");
         splashLayout.setEffect(new DropShadow());
     }
 
     @Override
     public void start(final Stage initStage) throws Exception {
+        final Task<ObservableList<String>> friendTask = new Task<ObservableList<String>>() {
+            @Override
+            protected ObservableList<String> call() throws InterruptedException {
+                ObservableList<String> foundFriends =
+                        FXCollections.<String>observableArrayList();
+                ObservableList<String> availableFriends =
+                        FXCollections.observableArrayList(
+                                "Fili", "Kili", "Oin", "Gloin", "Thorin",
+                                "Dwalin", "Balin", "Bifur", "Bofur",
+                                "Bombur", "Dori", "Nori", "Ori"
+                        );
 
-        final Thread loadThread = new Thread() { // anonymous thread to load data
-            public void run() {
-                try {
-                    File dataFile = new File("datafile.txt");
-                    data.loadData(dataFile);
+                for (int i = 0; i < availableFriends.size(); i++) {
+                    Thread.sleep(400);
+                    updateProgress(i + 1, availableFriends.size());
+                    String nextFriend = availableFriends.get(i);
+                    foundFriends.add(nextFriend);
+                    updateMessage("Loading in user data...");
                 }
-                catch (FileNotFoundException e){
-                    // do nothing
-                }
+                Thread.sleep(400);
+                updateMessage("Data Retrieved");
+
+                return foundFriends;
             }
         };
-
-        final Task<Integer> progressbarTask = new Task<Integer>() {
-            public Integer call() {
-                while(data.getUsersProcessed() < data.getTotalUsers()){
-                    updateProgress(data.getUsersProcessed(), data.getTotalUsers());
-                    updateMessage("importing data from msnbc . . .");
-                }
-                return data.getTotalUsers();
-            }
-        };
-
-        data = new Data(users, categories);
 
         showSplash(
                 initStage,
-                progressbarTask,
-                () -> showMainStage()
+                friendTask,
+                () -> showMainStage(friendTask.valueProperty())
         );
-
-        loadThread.start();
-        //progressbarThread.start();
-        new Thread(progressbarTask).start();
+        new Thread(friendTask).start();
     }
+
     private void showMainStage(
-            //ReadOnlyObjectProperty<ObservableList<String>> friends
+            ReadOnlyObjectProperty<ObservableList<String>> friends
     ) {
         mainStage = new Stage(StageStyle.DECORATED);
         mainStage.setTitle("My Friends");
@@ -106,7 +97,7 @@ public class GUI extends Application {
         ));
 
         final ListView<String> peopleView = new ListView<>();
-        //peopleView.itemsProperty().bind(friends);
+        peopleView.itemsProperty().bind(friends);
 
         mainStage.setScene(new Scene(peopleView));
         mainStage.show();
@@ -142,6 +133,7 @@ public class GUI extends Application {
         initStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
         initStage.show();
     }
+
     public interface InitCompletionHandler {
         public void complete();
     }
