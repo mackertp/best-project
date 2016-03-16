@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class Data {
@@ -10,6 +11,40 @@ public class Data {
     private int categories;
     private WorkerThread[] threadPool;
     LinkedBlockingQueue<Runnable> taskQueue;
+    private CountDownLatch countLatch; // used to block in queries untill all tasks are complete
+
+    /**
+     * This class defines a task that will count how many users in its sublist that have visited category at least once.
+     */
+    private class CountTask implements Runnable {
+
+        private int result;
+        private int start;
+        private int end;
+        private int category;
+
+        public CountTask(int start, int end, int category) {
+            this.start = start;
+            this.end = end;
+            this.category = category;
+        }
+
+        private int getResult() {
+            return result;
+        }
+
+        public void run() {
+            int count = 0;
+            for(int i=start; i<end; i++) {
+                if(msnbcData.getCategory(i, category) > 0) {
+                    count ++;
+                }
+            }
+            result = count;
+            countLatch.countDown();
+        }
+    }
+
 
     /**
      * This class defines the worker threads that make up the thread pool.
@@ -58,11 +93,12 @@ public class Data {
             }
         }
     }
-    
+
     public Data(int totalUsers, int categories) {
         msnbcData = new DataArray(totalUsers, categories);
         this.totalUsers = totalUsers;
         this.categories = categories;
+        taskQueue = new LinkedBlockingQueue<Runnable>();
 
         // Create the worker thread pool
         int processors = Runtime.getRuntime().availableProcessors();
@@ -79,7 +115,7 @@ public class Data {
 
         while (file.hasNextLine()){
             Scanner line = new Scanner(file.nextLine());
-            
+
             while (line.hasNextInt()){
                 int category = line.nextInt() - 1; // views are stored in file as 1-17 but stored in program as 0-16
                 msnbcData.setCategory(lineNum, category, msnbcData.getCategory(lineNum, category) + 1); // increment category
@@ -99,5 +135,38 @@ public class Data {
         return totalUsers;
     }
 
+    /**
+     * Multithreaded query to tell if more than userThreshold users visited category
+     *
+     * @param userThreshold how many users must have visited category
+     * @param category the category to consider
+     * @return True if amount of visitors to category is >= to userThreshold. False otherwise.
+     */
+    public boolean countQuery(int userThreshold, int category) {
+        int threadCount = threadPool.length;
+        int dataSubsize = msnbcData.theArray.length / threadCount;
+        CountTask[] tasks = new CountTask[threadCount]; // array of created tasks
+        try {
+            countLatch = new CountDownLatch(threadCount);
+            // create the tasks and place them in the pool of tasks
+            for (int i = 0; i < threadCount; i++){
+                CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category);
+                tasks[i] = newTask;
+                taskQueue.put(newTask);
+            }
+            countLatch.await(); // waits for all tasks to finish
+
+            int sum = 0;
+            // sum the results of the tasks
+            for(CountTask task : tasks) {
+                sum += task.getResult();
+            }
+
+            return sum > userThreshold;
+
+        } catch (InterruptedException e) {
+            return false;
+        }
+    }
 }
 
