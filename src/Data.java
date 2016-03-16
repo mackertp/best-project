@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.Scanner;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class Data {
 
@@ -7,11 +8,68 @@ public class Data {
     private int usersProcessed; // represents how many lines are loaded
     private int totalUsers;
     private int categories;
+    private WorkerThread[] threadPool;
+    LinkedBlockingQueue<Runnable> taskQueue;
+
+    /**
+     * This class defines the worker threads that make up the thread pool.
+     * A WorkerThread runs in a loop in which it retrieves a task from the
+     * taskQueue and calls the run() method in that task.  Note that if
+     * the queue is empty, the thread blocks until a task becomes available
+     * in the queue.  The constructor starts the thread, so there is no
+     * need for the main program to do so.  The thread will run at a priority
+     * that is one less than the priority of the thread that calls the
+     * constructor.
+     *
+     * A WorkerThread is designed to run in an infinite loop.  It will
+     * end only when the Java virtual machine exits. (This assumes that
+     * the tasks that are executed don't throw exceptions, which is true
+     * in this program.)  The constructor sets the thread to run as
+     * a daemon thread; the Java virtual machine will exit automatically when
+     * the only threads are daemon threads.  (In this program, this is not
+     * necessary since the virtual machine is set to exit when the
+     * window is closed.  In a multi-window program, however, we can't
+     * simply end the program when a window is closed.)
+     *
+     * @author David Eck
+     */
+    private class WorkerThread extends Thread {
+        WorkerThread() {
+            try {
+                setPriority( Thread.currentThread().getPriority() - 1);
+            }
+            catch (Exception e) {
+            }
+            try {
+                setDaemon(true);
+            }
+            catch (Exception e) {
+            }
+            start(); // Thread starts as soon as it is constructed.
+        }
+        public void run() {
+            while (true) {
+                try {
+                    Runnable task = taskQueue.take(); // wait for task if necessary
+                    task.run();
+                }
+                catch (InterruptedException e) {
+                }
+            }
+        }
+    }
     
     public Data(int totalUsers, int categories) {
         msnbcData = new DataArray(totalUsers, categories);
         this.totalUsers = totalUsers;
         this.categories = categories;
+
+        // Create the worker thread pool
+        int processors = Runtime.getRuntime().availableProcessors();
+        threadPool = new WorkerThread[processors];
+        for (int i = 0; i < processors; i++) {
+            threadPool[i] = new WorkerThread();
+        }
     }
 
     public void loadData(File dataFile) throws FileNotFoundException{
@@ -40,5 +98,6 @@ public class Data {
     public int getTotalUsers(){
         return totalUsers;
     }
+
 }
 
