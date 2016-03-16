@@ -17,47 +17,71 @@
 
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.concurrent.*;
 import javafx.geometry.*;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Duration;
+
+import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-/**
- * Splash page for loading in the msnbc data
- */
-
 public class GUI extends Application {
+
+    /**
+     * The class that contains all of the GUI components, extends Application which
+     * allows the program to run, it is the way in which everything will wind up
+     * fitting together and looking nice as an end product
+     */
+
+    // ---------------------------------------- global variables ---------------------------------------------------- //
 
     private static Data data;                 // the loaded msnbc data
     private static final int users = 989818;  // the total amount of users in the file
     private static final int categories = 17; // the total amount of categories
 
+    // these are the images used for the loading screen and then also the app icon
+
     public static final String APPLICATION_ICON =
             "http://static.tvtropes.org/pmwiki/pub/images/new-msnbc-logo-781050.gif";
     public static final String SPLASH_IMAGE =
-            "http://www.msnbc.com/sites/msnbc/themes/leanforward/images/site-header/msnbc-logo-card-twitter.png";
+            "http://static1.squarespace.com/static/5176f0fde4b0c6cbe95767cc/t/555cfe7ee4b089fc801515f6/1432157825036/MSNBC_Logo_Small.png?format=300w";
+    public static final String MAIN_LOGO =
+            "http://static1.squarespace.com/static/5176f0fde4b0c6cbe95767cc/t/555cfe7ee4b089fc801515f6/1432157825036/MSNBC_Logo_Small.png";
 
-    private Pane splashLayout;
-    private ProgressBar loadProgress;
-    private Label progressText;
+    private Pane splashLayout;                 // to set up the loading screen appearance
+    private ProgressBar loadProgress;          // need this to show a loading bar
+    private Label progressText;                // give text to the user to see what is being loaded
     private Stage mainStage;
+    private Scene scene1;
     private static final int SPLASH_WIDTH = 600;
     private static final int SPLASH_HEIGHT = 400;
 
-    public static void main(String[] args) throws Exception {launch(args);}
+    // ---------------------------------------- run application ----------------------------------------------------- //
+
+    public static void main(String[] args) throws Exception {launch(args);}  // this is what launches the app itself
+
+    // ---------------------------------------- support methods ----------------------------------------------------- //
 
     @Override
     public void init() {
+        /**
+         * method that sets up and starts the loading screen, packs the images and the progress bar
+         * into the splash layout then sets up the way the loading will appear
+         */
         ImageView splash = new ImageView(new Image(SPLASH_IMAGE));
         loadProgress = new ProgressBar();
-        loadProgress.setPrefWidth(SPLASH_WIDTH+210);
+        loadProgress.setPrefWidth(400);
         progressText = new Label("importing data from msnbc . . .");
         splashLayout = new VBox();
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
@@ -67,46 +91,15 @@ public class GUI extends Application {
         splashLayout.setEffect(new DropShadow());
     }
 
-    @Override
-    public void start(final Stage initStage) throws Exception {
-
-        final Thread loadThread = new Thread() {           // anonymous thread to load data
-            public void run() {
-                try {
-                    File dataFile = new File("datafile.txt");
-                    data.loadData(dataFile);
-                }
-                catch (FileNotFoundException e){}         // do nothing
-            }
-        };
-
-        final Task<Integer> progressbarTask = new Task<Integer>() {
-            public Integer call() {
-                while(data.getUsersProcessed() < data.getTotalUsers()){
-                    updateProgress(data.getUsersProcessed(), data.getTotalUsers());
-                    updateMessage("importing data from msnbc . . .");
-                }
-                return data.getTotalUsers();
-            }
-        };
-
-        data = new Data(users, categories);
-
-        showSplash(initStage, progressbarTask, () -> showMainStage());
-        loadThread.start();            //progressbarThread.start();
-        new Thread(progressbarTask).start();
-    }
-    private void showMainStage() {
-        mainStage = new Stage(StageStyle.DECORATED);
-        mainStage.setTitle("My Friends");
-        mainStage.getIcons().add(new Image(APPLICATION_ICON));
-        final ListView<String> peopleView = new ListView<>();
-        mainStage.setScene(new Scene(peopleView));
-        mainStage.show();
+    public interface InitCompletionHandler {
+        void complete(); // needed to have this for changing from loading screen to main
     }
 
     private void showSplash(final Stage initStage, Task<?> task, InitCompletionHandler initCompletionHandler) {
-
+        /**
+         * method to get the splash screen to show, uses the initStage, a task (the thread that will load in the
+         * current progress of data), and the init's handler.
+         */
         progressText.textProperty().bind(task.messageProperty());
         loadProgress.progressProperty().bind(task.progressProperty());
         task.stateProperty().addListener((observableValue, oldState, newState) -> {
@@ -122,7 +115,7 @@ public class GUI extends Application {
                 initCompletionHandler.complete();
             }
         });
-
+        // setting up the scene and display options
         Scene splashScene = new Scene(splashLayout);
         initStage.initStyle(StageStyle.UNDECORATED);
         final Rectangle2D bounds = Screen.getPrimary().getBounds();
@@ -131,7 +124,83 @@ public class GUI extends Application {
         initStage.setY(bounds.getMinY() + bounds.getHeight() / 2 - SPLASH_HEIGHT / 2);
         initStage.show();
     }
-    public interface InitCompletionHandler {
-        void complete();
+
+    private void showMainStage() {
+        /**
+         * The load screen is complete and now inside the main application with the data all loaded into our
+         * array. From here the user will be able to select a query and progress forward through the program.
+         */
+
+        ObservableList<String> options =					// creating options for the queries
+                FXCollections.observableArrayList(
+                        "Are there more than ____ users who looked at X",
+                        "What percent of users looked at X",
+                        "Are there more users who looked at X than Y",
+                        "How many users viewed X ___ number of times",
+                        "What percent of users looked at X more than Y"
+                );
+
+        ComboBox querySel = new ComboBox();					// drop down to select query
+        querySel.setItems(options);
+        querySel.setPromptText("select a query...");
+
+        Button search = new Button("go");				// button that initiates the query
+        search.setMaxWidth(100);
+        search.setMinWidth(100);
+        search.setOnAction(e -> {
+        });
+
+        ImageView logo = new ImageView(new Image(MAIN_LOGO));
+
+        mainStage = new Stage();
+        mainStage.setTitle("msnbc data queries");
+
+        TilePane selQuery = new TilePane(Orientation.HORIZONTAL);		// make a pane to make GUI look sexy
+        selQuery.getChildren().addAll(querySel, search);
+        selQuery.setAlignment(Pos.CENTER);
+
+        HBox select = new HBox(8);
+        select.getChildren().addAll(querySel, search);
+        select.setAlignment(Pos.CENTER);
+
+        VBox layout1 = new VBox(40);									// pack together the panes and header
+        layout1.getChildren().addAll(logo, select);
+        layout1.setAlignment(Pos.CENTER);
+
+        mainStage.getIcons().add(new Image(APPLICATION_ICON));
+        scene1 = new Scene(layout1, 900, 600);
+        mainStage.setScene(scene1);
+        mainStage.show();
+    }
+
+    @Override
+    public void start(final Stage initStage) throws Exception {
+        /**
+         * the start method is what makes the application go, it is like the main portion of the program for
+         * javaFx, the actual data file will be loaded here and the program will work for what we need it to do.
+         */
+        final Thread loadThread = new Thread() {                         // anonymous thread to load data
+            public void run() {
+                try {
+                    File dataFile = new File("datafile.txt");
+                    data.loadData(dataFile);
+                }
+                catch (FileNotFoundException e){}                       // do nothing
+            }
+        };
+
+        final Task<Integer> progressbarTask = new Task<Integer>() {
+            public Integer call() {
+                while(data.getUsersProcessed() < data.getTotalUsers()){
+                    updateProgress(data.getUsersProcessed(), data.getTotalUsers());
+                    updateMessage("importing data from msnbc . . .");
+                }
+                return data.getTotalUsers();
+            }
+        };
+        data = new Data(users, categories);
+        showSplash(initStage, progressbarTask, () -> showMainStage());
+        loadThread.start();                                             // progressbarThread.start();
+        new Thread(progressbarTask).start();
     }
 }

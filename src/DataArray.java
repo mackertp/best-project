@@ -1,6 +1,6 @@
-import java.util.AbstractList;
 
 public class DataArray{
+
     int[][] theArray;
 
     public DataArray(int rows, int cols){
