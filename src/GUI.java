@@ -78,42 +78,13 @@ public class GUI extends Application {
             public Integer call() {
                 while(data.getUsersProcessed() < data.getTotalUsers()){
                     updateProgress(data.getUsersProcessed(), data.getTotalUsers());
+                    updateMessage("importing data from msnbc . . .");
                 }
                 return data.getTotalUsers();
             }
         };
+
         data = new Data(users, categories);
-
-        while(loadThread.isAlive()){
-            System.out.println(data.getUsersProcessed() + " out of " + data.getTotalUsers());
-        }
-
-
-        /*final Task<ObservableList<String>> friendTask = new Task<ObservableList<String>>() {
-            @Override
-            protected ObservableList<String> call() throws InterruptedException {
-                ObservableList<String> foundFriends =
-                        FXCollections.<String>observableArrayList();
-                ObservableList<String> availableFriends =
-                        FXCollections.observableArrayList(
-                                "Fili", "Kili", "Oin", "Gloin", "Thorin",
-                                "Dwalin", "Balin", "Bifur", "Bofur",
-                                "Bombur", "Dori", "Nori", "Ori"
-                        );
-
-                for (int i = 0; i < availableFriends.size(); i++) {
-                    Thread.sleep(400);
-                    updateProgress(i + 5, availableFriends.size() + 5);
-                    String nextFriend = availableFriends.get(i);
-                    foundFriends.add(nextFriend);
-                    updateMessage("Loading in user data...");
-                }
-                Thread.sleep(100);
-                updateMessage("Data Retrieved");
-
-                return foundFriends;
-            }
-        };*/
 
         showSplash(
                 initStage,
