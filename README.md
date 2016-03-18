@@ -1,4 +1,4 @@
-# google
+# MSNBC Data Query
 CSC213 Project 1
 Overview
 
