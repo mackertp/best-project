@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.regex.Pattern;
 
 public class Data {
 
@@ -108,22 +109,27 @@ public class Data {
         }
     }
 
-    public void loadData(File dataFile) throws FileNotFoundException{
+    public void loadData(File dataFile) throws IOException{
         int lineNum = 0;
 
-        Scanner file = new Scanner(dataFile);
+        BufferedReader br = new BufferedReader(new FileReader(dataFile));
+        String line;
+        Pattern splitSpace = Pattern.compile(" ");
 
-        while (file.hasNextLine()){
-            Scanner line = new Scanner(file.nextLine());
+        while ((line = br.readLine()) != null){
+            String[] numbers = splitSpace.split(line);
 
-            while (line.hasNextInt()){
-                int category = line.nextInt() - 1; // views are stored in file as 1-17 but stored in program as 0-16
+            for (String number : numbers){
+                int category = Integer.parseInt(number) - 1; // views are stored in file as 1-17 but stored in program as 0-16
                 msnbcData.setCategory(lineNum, category, msnbcData.getCategory(lineNum, category) + 1); // increment category
             }
 
             usersProcessed++;
             lineNum++;
+
         }
+
+        br.close();
 
     }
 

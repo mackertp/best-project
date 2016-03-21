@@ -15,6 +15,7 @@
  *
  */
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -35,6 +36,7 @@ import javafx.util.Duration;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class GUI extends Application {
 
@@ -262,7 +264,7 @@ public class GUI extends Application {
                     File dataFile = new File("datafile.txt");
                     data.loadData(dataFile);
                 }
-                catch (FileNotFoundException e){}                       // do nothing
+                catch (IOException e){}                       // do nothing
             }
         };
 
