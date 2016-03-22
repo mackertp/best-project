@@ -12,7 +12,6 @@ public class Data {
     private int categories;
     private WorkerThread[] threadPool;
     LinkedBlockingQueue<Runnable> taskQueue;
-    private CountDownLatch countLatch; // used to block in queries untill all tasks are complete
 
     /**
      * This class defines a task that will count how many users in its sublist that have visited category at least once.
@@ -23,11 +22,20 @@ public class Data {
         private int start;
         private int end;
         private int category;
+        private CountDownLatch latch; // used to keep track of how many tasks are still working/queued.
 
-        public CountTask(int start, int end, int category) {
+        /**
+         * Creates a new task to count how many users visited a category in a given sublist
+         * @param start starting index (inclusive)
+         * @param end ending index (exclusive)
+         * @param category category to count
+         * @param latch latch to signal when task is done
+         */
+        public CountTask(int start, int end, int category, CountDownLatch latch) {
             this.start = start;
             this.end = end;
             this.category = category;
+            this.latch = latch;
         }
 
         private int getResult() {
@@ -42,7 +50,7 @@ public class Data {
                 }
             }
             result = count;
-            countLatch.countDown();
+            latch.countDown();
         }
     }
 
@@ -153,10 +161,10 @@ public class Data {
         int dataSubsize = msnbcData.theArray.length / threadCount;
         CountTask[] tasks = new CountTask[threadCount]; // array of created tasks
         try {
-            countLatch = new CountDownLatch(threadCount);
+            CountDownLatch countLatch = new CountDownLatch(threadCount); // lets us block until all tasks finish.
             // create the tasks and place them in the pool of tasks
             for (int i = 0; i < threadCount; i++){
-                CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category);
+                CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, countLatch);
                 tasks[i] = newTask;
                 taskQueue.put(newTask);
             }
