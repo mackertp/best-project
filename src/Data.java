@@ -39,15 +39,15 @@ public class Data {
             this.category = category;
             this.latch = latch;
 
-            if (this.start > msnbcData.theArray.length) {
+            if (this.start > msnbcData.getUsers()) {
                 // if is out of range we should fix it.
-                this.start = msnbcData.theArray.length -1 ;
+                this.start = msnbcData.getUsers() -1 ;
             }
 
-            if (this.end > msnbcData.theArray.length) {
+            if (this.end > msnbcData.getUsers()) {
                 // if end is out of range we should fix it.
                 // this case can easily happen during the division step of the query algorithm
-                this.end = msnbcData.theArray.length;
+                this.end = msnbcData.getUsers();
             }
         }
 
@@ -171,7 +171,7 @@ public class Data {
      */
     private int countUsersByCategory(int category) throws InterruptedException {
         // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
-        int dataSubsize = (int) Math.ceil((double) msnbcData.theArray.length / (double) taskCount);
+        int dataSubsize = (int) Math.ceil((double) msnbcData.getUsers() / (double) taskCount);
         CountTask[] tasks = new CountTask[taskCount]; // array of created tasks
         CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
         // create the tasks and place them in the pool of tasks
@@ -212,7 +212,7 @@ public class Data {
      */
     public float percentageCountQuery(int category) {
         try {
-            return (float)countUsersByCategory(category) / (float)msnbcData.theArray.length;
+            return (float)countUsersByCategory(category) / (float)msnbcData.getUsers();
         } catch (InterruptedException e) {
             return -1;
         }
