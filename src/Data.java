@@ -58,6 +58,7 @@ public class Data {
         public void run() {
             int count = 0;
             for(int i=start; i<end; i++) {
+
                 if(msnbcData.getCategory(i, category) > 0) {
                     count ++;
                 }
@@ -147,7 +148,6 @@ public class Data {
 
             usersProcessed++;
             lineNum++;
-
         }
 
         br.close();
@@ -163,6 +163,33 @@ public class Data {
     }
 
     /**
+     * Using multithreading, count the amount of users who have visited a given category at least once. Used for the
+     * countQuery and countPercentQuery methods.
+     *
+     * @param category the category to consider
+     * @return the count of uses who have visited category.
+     */
+    private int countUsersByCategory(int category) throws InterruptedException {
+        // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
+        int dataSubsize = (int) Math.ceil((double) msnbcData.theArray.length / (double) taskCount);
+        CountTask[] tasks = new CountTask[taskCount]; // array of created tasks
+        CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
+        // create the tasks and place them in the pool of tasks
+        for (int i = 0; i < taskCount; i++) {
+            CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, countLatch);
+            tasks[i] = newTask;
+            taskQueue.put(newTask);
+        }
+        countLatch.await(); // waits for all tasks to finish
+        int sum = 0;
+        // sum the results of the tasks
+        for (CountTask task : tasks) {
+            sum += task.getResult();
+        }
+        return sum;
+    }
+
+    /**
      * Multithreaded query to tell if more than userThreshold users visited category
      *
      * @param userThreshold how many users must have visited category
@@ -170,29 +197,24 @@ public class Data {
      * @return True if amount of visitors to category is >= to userThreshold. False otherwise.
      */
     public boolean countQuery(int userThreshold, int category) {
-        // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
-        int dataSubsize = (int)Math.ceil ((double)msnbcData.theArray.length / (double)taskCount);
-        CountTask[] tasks = new CountTask[taskCount]; // array of created tasks
         try {
-            CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
-            // create the tasks and place them in the pool of tasks
-            for (int i = 0; i < taskCount; i++){
-                CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, countLatch);
-                tasks[i] = newTask;
-                taskQueue.put(newTask);
-            }
-            countLatch.await(); // waits for all tasks to finish
-
-            int sum = 0;
-            // sum the results of the tasks
-            for(CountTask task : tasks) {
-                sum += task.getResult();
-            }
-
-            return sum > userThreshold;
-
+            return countUsersByCategory(category) > userThreshold;
         } catch (InterruptedException e) {
             return false;
+        }
+    }
+
+    /**
+     * Multithreaded query to calculate the percentage of users who visited a category.
+     *
+     * @param category the category to consider
+     * @return a float from 0 to 100 inclusive representing the percent of users who visited category. -1 if error.
+     */
+    public float percentageCountQuery(int category) {
+        try {
+            return (float)countUsersByCategory(category) / (float)msnbcData.theArray.length;
+        } catch (InterruptedException e) {
+            return -1;
         }
     }
 }

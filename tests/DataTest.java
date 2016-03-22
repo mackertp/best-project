@@ -14,4 +14,12 @@ public class DataTest {
         data.loadData(file);
         assertEquals(true, data.countQuery(3, 1));
     }
+
+    @org.junit.Test
+    public void testPercentageCountQuery() throws Exception {
+        File file = new File("testdatafile.txt");
+        Data data = new Data(62, 17);
+        data.loadData(file);
+        assertEquals(12f / 62f, data.percentageCountQuery(0), 0.0f);
+    }
 }
