@@ -6,6 +6,8 @@ import java.util.regex.Pattern;
 
 public class Data {
 
+    final private int taskCount = 24; // How many tasks to create per query.
+
     private DataArray msnbcData;
     private int usersProcessed; // represents how many lines are loaded
     private int totalUsers;
@@ -36,6 +38,17 @@ public class Data {
             this.end = end;
             this.category = category;
             this.latch = latch;
+
+            if (this.start > msnbcData.theArray.length) {
+                // if is out of range we should fix it.
+                this.start = msnbcData.theArray.length -1 ;
+            }
+
+            if (this.end > msnbcData.theArray.length) {
+                // if end is out of range we should fix it.
+                // this case can easily happen during the division step of the query algorithm
+                this.end = msnbcData.theArray.length;
+            }
         }
 
         private int getResult() {
@@ -157,13 +170,13 @@ public class Data {
      * @return True if amount of visitors to category is >= to userThreshold. False otherwise.
      */
     public boolean countQuery(int userThreshold, int category) {
-        int threadCount = threadPool.length;
-        int dataSubsize = msnbcData.theArray.length / threadCount;
-        CountTask[] tasks = new CountTask[threadCount]; // array of created tasks
+        // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
+        int dataSubsize = (int)Math.ceil ((double)msnbcData.theArray.length / (double)taskCount);
+        CountTask[] tasks = new CountTask[taskCount]; // array of created tasks
         try {
-            CountDownLatch countLatch = new CountDownLatch(threadCount); // lets us block until all tasks finish.
+            CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
             // create the tasks and place them in the pool of tasks
-            for (int i = 0; i < threadCount; i++){
+            for (int i = 0; i < taskCount; i++){
                 CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, countLatch);
                 tasks[i] = newTask;
                 taskQueue.put(newTask);
