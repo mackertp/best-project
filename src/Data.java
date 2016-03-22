@@ -4,6 +4,21 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
+/**
+ * The Data class is responsible for reading the data file into its
+ * compressed format, and for querying the dataset.
+ *
+ * The queries are as follows:
+ * The user is able to perform the following 5 distinct queries:
+ * Are there more than _____ users who looked at X (countQuery)
+ * What percent of users looked at X (percentageCountQuery)
+ * Are there more users who looked at X than Y (comparisonQuery)
+ * How many users viewed X _____ number of times (countThresholdQuery)
+ * What percent of users looked at X more than Y (percentageComparisonQuery)
+ *
+ * @author Robert Bofinger, Preston Mackert
+ */
+
 public class Data {
 
     final private int taskCount = 24; // How many tasks to create per query.
