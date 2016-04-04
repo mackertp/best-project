@@ -5,8 +5,14 @@ import java.io.File;
 import static org.junit.Assert.*;
 
 /**
- * Created by bofinger on 3/16/2016.
+ * JUnit test for the data class, it tests all of the queries on a small testing data file so that we can make sure it
+ * is returning the values that we know.
+ *
+ * @author Robert Bofinger
+ * @author Preston Mackert
+ *
  */
+
 public class DataTest {
 
     Data data;

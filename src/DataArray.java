@@ -18,6 +18,7 @@ public class DataArray{
     /**
      * @return The amount of users stored
      */
+
     public int getUsers() {
         return theArray.length;
     }
@@ -25,6 +26,7 @@ public class DataArray{
     /**
      * @return The amount of categories stored
      */
+
     public  int getCategories() {
         return theArray[0].length;
     }

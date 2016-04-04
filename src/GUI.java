@@ -15,7 +15,6 @@
  *
  */
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
@@ -32,10 +31,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.stage.*;
 import javafx.util.Duration;
-
-import java.awt.*;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class GUI extends Application {
@@ -89,7 +85,7 @@ public class GUI extends Application {
         splashLayout.getChildren().addAll(splash, loadProgress, progressText);
         progressText.setAlignment(Pos.CENTER);
         splashLayout.setStyle("-fx-padding: 5; " + "-fx-background-color: white; " + "-fx-border-width:2; " +
-                "-fx-border-color: " + "linear-gradient(" + "to bottom, " + "blue, " + "#6666ff" + ");");
+                "-fx-border-color: " + "linear-gradient(" + "to bottom, " + "white, " + "#6666ff" + ");");
         splashLayout.setEffect(new DropShadow());
     }
 
@@ -150,7 +146,7 @@ public class GUI extends Application {
         querySel.setItems(options);
         querySel.setPromptText("select a query...");
 
-        Button search = new Button("go");				// button that initiates the query
+        Button search = new Button("go");				   // button that initiates the query
         search.setMaxWidth(100);
         search.setMinWidth(100);
         search.setOnAction(e -> {
@@ -192,55 +188,195 @@ public class GUI extends Application {
 
         // ----------------- query1 screen ----------------- //
 
+        String[] catNames = {"front page", "news", "tech", "local", "opinion", "on-air", "misc", "weather", "msn-news",
+                "health", "living", "business", "msn-sports", "sports", "summary", "bbs", "travel"};
+
+        ObservableList<String> categories =					// creating options for the queries
+                FXCollections.observableArrayList(
+                        "front page",
+                        "news",
+                        "tech",
+                        "local",
+                        "opinion",
+                        "on-air",
+                        "misc",
+                        "weather",
+                        "msn-news",
+                        "health",
+                        "living",
+                        "business",
+                        "msn-sports",
+                        "sports",
+                        "summary",
+                        "bbs",
+                        "travel"
+                );
+
+        ComboBox catSel = new ComboBox();					// drop down to select query
+        catSel.setItems(categories);
+        catSel.setPromptText("select a category...");
+
         Button returnMain1 = new Button("return");
         returnMain1.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        VBox layout2 = new VBox();
-        layout2.getChildren().addAll(returnMain1);
+        Button answer = new Button("go");
+        answer.setOnAction(e -> {
+
+            String cat = catSel.getSelectionModel().getSelectedItem().toString();
+            int col = -1;
+            for (int i=0;i<catNames.length;i++) {
+                if (catNames[i].equals(cat)) {
+                    col = i;
+                    break;
+                }
+            }
+
+        });
+
+        Label instruct = new Label("Type in a number of views and then select a category to answer the query");
+
+        TextField numViews = new TextField();
+        numViews.setPromptText("views...");
+        numViews.setMaxWidth(100);
+
+        HBox inputs = new HBox(10);
+        inputs.getChildren().addAll(numViews, catSel);
+        inputs.setAlignment(Pos.CENTER);
+
+        HBox buttons = new HBox(10);
+        buttons.getChildren().addAll(returnMain1, answer);
+        buttons.setAlignment(Pos.CENTER);
+
+        VBox layout2 = new VBox(70);
+        layout2.getChildren().addAll(instruct, inputs, buttons);
         layout2.setAlignment(Pos.CENTER);
 
         scene2 = new Scene(layout2, 900, 600);
 
         // ----------------- query2 screen ----------------- //
 
+        Label instruct2 = new Label("Select a category from the dropdown to answer the query");
+
+        ComboBox catSel2 = new ComboBox();
+        catSel2.setItems(categories);
+        catSel2.setPromptText("select a category...");
+
+        Button answer2 = new Button("go");
+        answer2.setOnAction(e -> {
+
+        });
+
         Button returnMain2 = new Button("return");
         returnMain2.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        VBox layout3 = new VBox();
-        layout3.getChildren().add(returnMain2);
+        HBox buttons2 = new HBox(10);
+        buttons2.getChildren().addAll(returnMain2, answer2);
+        buttons2.setAlignment(Pos.CENTER);
+
+        VBox layout3 = new VBox(70);
+        layout3.getChildren().addAll(instruct2, catSel2, buttons2);
         layout3.setAlignment(Pos.CENTER);
 
         scene3 = new Scene(layout3, 900, 600);
 
         // ----------------- query3 screen ----------------- //
 
+        Label instruct3 = new Label("Select two categories from the dropdown bars to answer the query");
+
+        ComboBox catSel3 = new ComboBox();
+        catSel3.setItems(categories);
+        catSel3.setPromptText("select a category...");
+
+        ComboBox catSel_3 = new ComboBox();
+        catSel_3.setItems(categories);
+        catSel_3.setPromptText("select a category...");
+
+        Button answer3 = new Button("go");
+        answer3.setOnAction(e -> {
+
+        });
+
         Button returnMain3 = new Button("return");
         returnMain3.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        VBox layout4 = new VBox();
-        layout4.getChildren().add(returnMain3);
+        HBox dropdowns = new HBox(10);
+        dropdowns.getChildren().addAll(catSel3, catSel_3);
+        dropdowns.setAlignment(Pos.CENTER);
+
+        HBox buttons3 = new HBox(10);
+        buttons3.getChildren().addAll(returnMain3, answer3);
+        buttons3.setAlignment(Pos.CENTER);
+
+        VBox layout4 = new VBox(70);
+        layout4.getChildren().addAll(instruct3, dropdowns, buttons3);
         layout4.setAlignment(Pos.CENTER);
 
         scene4 = new Scene(layout4, 900, 600);
 
         // ----------------- query4 screen ----------------- //
 
+        Label instruct4 = new Label("Type in a number of views and then select a category to answer the query");
+
+        TextField numViews4 = new TextField();
+        numViews4.setPromptText("views...");
+        numViews4.setMaxWidth(100);
+
+        ComboBox catSel4 = new ComboBox();
+        catSel4.setItems(categories);
+        catSel4.setPromptText("select a category...");
+
         Button returnMain4 = new Button("return");
         returnMain4.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        VBox layout5 = new VBox();
-        layout5.getChildren().add(returnMain4);
+        Button answer4 = new Button("go");
+        answer4.setOnAction(e -> {
+
+        });
+
+        HBox inputs4 = new HBox(10);
+        inputs4.getChildren().addAll(numViews4, catSel4);
+        inputs4.setAlignment(Pos.CENTER);
+
+        HBox buttons4 = new HBox(10);
+        buttons4.getChildren().addAll(returnMain4, answer4);
+        buttons4.setAlignment(Pos.CENTER);
+
+        VBox layout5 = new VBox(70);
+        layout5.getChildren().addAll(instruct4, inputs4, buttons4);
         layout5.setAlignment(Pos.CENTER);
 
         scene5 = new Scene(layout5, 900, 600);
 
         // ----------------- query5 screen ----------------- //
 
+        Label instruct5 = new Label("Select two categories from the dropdown bars to answer the query");
+
+        ComboBox catSel5 = new ComboBox();
+        catSel5.setItems(categories);
+        catSel5.setPromptText("select a category...");
+
+        ComboBox catSel_5 = new ComboBox();
+        catSel_5.setItems(categories);
+        catSel_5.setPromptText("select a category...");
+
+        Button answer5 = new Button("go");
+        answer5.setOnAction(e -> {
+
+        });
+
         Button returnMain5 = new Button("return");
         returnMain5.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        VBox layout6 = new VBox();
-        layout6.getChildren().add(returnMain5);
+        HBox dropdowns5 = new HBox(10);
+        dropdowns5.getChildren().addAll(catSel5, catSel_5);
+        dropdowns5.setAlignment(Pos.CENTER);
+
+        HBox buttons5 = new HBox(10);
+        buttons5.getChildren().addAll(returnMain5, answer5);
+        buttons5.setAlignment(Pos.CENTER);
+
+        VBox layout6 = new VBox(70);
+        layout6.getChildren().addAll(instruct5, dropdowns5, buttons5);
         layout6.setAlignment(Pos.CENTER);
 
         scene6 = new Scene(layout6, 900, 600);
