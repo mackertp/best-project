@@ -210,7 +210,7 @@ public class Data {
      * Using multithreading, count the amount of users who have visited a given category at least once. Used for the
      * countQuery and countPercentQuery methods.
      *
-     * @params threshold how many visits to a category must be made for the user to be counted
+     * @param threshold how many visits to a category must be made for the user to be counted
      * @param category the category to consider
      * @return the count of uses who have visited category.
      */
@@ -291,6 +291,27 @@ public class Data {
             return countUsersByCategory(threshold, category);
         }
         catch (InterruptedException e){
+            return -1;
+        }
+    }
+
+    /**
+     * Multithreaded query to calculate the percent of users that viewed one category more than another category.
+     * @param category1 the first category to consider
+     * @param category2 the second category to consider
+     * @return percentage of users who visited which category more.
+    */
+    public float comparePercentageQuery(int category1, int category2){
+        try {
+            int users1 = countUsersByCategory(category1);
+            int users2 = countUsersByCategory(category2);
+
+            if (users1 > users2){
+                return (float)(users1-users2)/(users1+users2);
+            } else {
+                return (float)(users2-users1)/(users1+users2);
+            }
+        } catch (InterruptedException e){
             return -1;
         }
     }

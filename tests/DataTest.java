@@ -45,4 +45,11 @@ public class DataTest {
         // How many users viewed X ___ (or more) number of times
         assertEquals(2, data.countThresholdQuery(5, 0));
     }
+
+    @org.junit.Test
+    public void testComparePercentageQuery() throws Exception {
+        // percentage of users who visited which category more.
+        System.out.println("");
+    }
+
 }

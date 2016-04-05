@@ -453,9 +453,40 @@ public class GUI extends Application {
         catSel_5.setItems(categories);
         catSel_5.setPromptText("select a category...");
 
+        Label resultText5 = new Label();
+
         Button answer5 = new Button("go");
         answer5.setOnAction(e -> {
+            String cat1 = catSel5.getSelectionModel().getSelectedItem().toString();
+            int col1 = -1;
+            for (int i=0;i<catNames.length;i++) {
+                if (catNames[i].equals(cat1)) {
+                    col1 = i;
+                    break;
+                }
+            }
 
+            String cat2 = catSel_5.getSelectionModel().getSelectedItem().toString();
+            int col2 = -1;
+            for (int i=0;i<catNames.length;i++) {
+                if (catNames[i].equals(cat2)) {
+                    col2 = i;
+                    break;
+                }
+            }
+
+            if (col1 >= 0 && col2 >=0){
+                float percAns = data.comparePercentageQuery(col1, col2);
+                String percentage = String.format("%.6f", percAns);
+                boolean ans = data.comparisonQuery(col1, col2);
+                if (ans) {
+                    resultText5.setText(cat1 + " had more viewers than " + cat2 + " by " + percentage + "% more viewers");
+                } else{
+                    resultText5.setText(cat2 + " had more viewers than " + cat1 + " by " + percentage + "% more viewers");
+                }
+            } else {
+                resultText5.setText("One or both categories not selected");
+            }
         });
 
         Button returnMain5 = new Button("return");
@@ -470,7 +501,7 @@ public class GUI extends Application {
         buttons5.setAlignment(Pos.CENTER);
 
         VBox layout6 = new VBox(70);
-        layout6.getChildren().addAll(instruct5, dropdowns5, buttons5);
+        layout6.getChildren().addAll(instruct5, dropdowns5, resultText5, buttons5);
         layout6.setAlignment(Pos.CENTER);
 
         scene6 = new Scene(layout6, 900, 600);
