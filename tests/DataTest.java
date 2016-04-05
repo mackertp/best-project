@@ -48,7 +48,7 @@ public class DataTest {
 
     @org.junit.Test
     public void testComparePercentageQuery() throws Exception {
-        // percentage of users who visited which category more.
+        // What percent of users looked at X more than Y
         System.out.println("");
     }
 

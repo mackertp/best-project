@@ -127,6 +127,7 @@ public class GUI extends Application {
         /**
          * The load screen is complete and now inside the main application with the data all loaded into our
          * array. From here the user will be able to select a query and progress forward through the program.
+         * Each of the five queries are given their own scene in the GUI which allows it to stay looking 100
          */
 
         mainStage = new Stage();
@@ -191,7 +192,10 @@ public class GUI extends Application {
         String[] catNames = {"front page", "news", "tech", "local", "opinion", "on-air", "misc", "weather", "msn-news",
                 "health", "living", "business", "msn-sports", "sports", "summary", "bbs", "travel"};
 
-        ObservableList<String> categories =					// creating options for the queries
+        // this array is used to determine the column in the 2d array we are going to use. The index is the column that
+        // gets associated with the string that is the name of the category. Used because you can't index an observable.
+
+        ObservableList<String> categories =					          // creating options for the queries
                 FXCollections.observableArrayList(
                         "front page",
                         "news",
@@ -212,20 +216,22 @@ public class GUI extends Application {
                         "travel"
                 );
 
-        ComboBox catSel = new ComboBox();					// drop down to select query
+        ComboBox catSel = new ComboBox();					                  // drop down to select query
         catSel.setItems(categories);
         catSel.setPromptText("select a category...");
 
-        TextField numViews = new TextField();
+        TextField numViews = new TextField();                                 // grabs user input
         numViews.setPromptText("views...");
         numViews.setMaxWidth(100);
 
-        Label resultText = new Label();
+        Label instruct = new Label("Type in a number of views and then select a category to answer the query");
+
+        Label resultText = new Label();                                      // stores the answer for query 1
 
         Button returnMain1 = new Button("return");
         returnMain1.setOnAction(e -> {mainStage.setScene(scene1);});
 
-        Button answer = new Button("go");
+        Button answer = new Button("go");                                   // does the work to answer the query
         answer.setOnAction(e -> {
             String cat = catSel.getSelectionModel().getSelectedItem().toString();
             int col = -1;
@@ -236,7 +242,7 @@ public class GUI extends Application {
                 }
             }
 
-            int numberViews = 0;
+            int numberViews = 0;                                            // the threshold
 
             try{
                 numberViews = Integer.parseInt(numViews.getCharacters().toString());
@@ -244,8 +250,8 @@ public class GUI extends Application {
                 resultText.setText("enter a valid number for views");
             }
 
-            if (col >= 0){
-                boolean answerQ = data.countQuery(numberViews, col);
+            if (col >= 0){                                                 // if valid category
+                boolean answerQ = data.countQuery(numberViews, col);       // compares views vs threshold
                 if (answerQ){
                     resultText.setText("There were more than " + numberViews + " users who looked at " + cat);
                 } else {
@@ -255,8 +261,6 @@ public class GUI extends Application {
                 resultText.setText("The category selected was not registered");
             }
         });
-
-        Label instruct = new Label("Type in a number of views and then select a category to answer the query");
 
         HBox inputs = new HBox(10);
         inputs.getChildren().addAll(numViews, catSel);
@@ -525,7 +529,7 @@ public class GUI extends Application {
                     File dataFile = new File("datafile.txt");
                     data.loadData(dataFile);
                 }
-                catch (IOException e){}                       // do nothing
+                catch (IOException e){}                                   // do nothing
             }
         };
 
@@ -540,7 +544,7 @@ public class GUI extends Application {
         };
         data = new Data(users, categories);
         showSplash(initStage, progressbarTask, () -> showMainStage());
-        loadThread.start();                                             // progressbarThread.start();
+        loadThread.start();                                              // progressbarThread.start();
         new Thread(progressbarTask).start();
     }
 }
