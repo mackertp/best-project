@@ -240,7 +240,9 @@ public class GUI extends Application {
 
             try{
                 numberViews = Integer.parseInt(numViews.getCharacters().toString());
-            } catch (NumberFormatException k){}
+            } catch (NumberFormatException k){
+                resultText.setText("enter a valid number for views");
+            }
 
             if (col >= 0){
                 boolean answerQ = data.countQuery(numberViews, col);
@@ -388,11 +390,40 @@ public class GUI extends Application {
         catSel4.setItems(categories);
         catSel4.setPromptText("select a category...");
 
+        Label resultText4 = new Label();
+
         Button returnMain4 = new Button("return");
         returnMain4.setOnAction(e -> {mainStage.setScene(scene1);});
 
         Button answer4 = new Button("go");
         answer4.setOnAction(e -> {
+            String cat = catSel4.getSelectionModel().getSelectedItem().toString();
+            int col = -1;
+            for (int i=0;i<catNames.length;i++) {
+                if (catNames[i].equals(cat)) {
+                    col = i;
+                    break;
+                }
+            }
+
+            int threshold = 0;
+
+            try{
+                threshold = Integer.parseInt(numViews4.getCharacters().toString());
+            } catch (NumberFormatException k){
+                resultText4.setText("enter a valid number for a threshold");
+            }
+
+            if (col >= 0){
+                int count = data.countThresholdQuery(threshold, col);
+                if (count > threshold){
+                    resultText4.setText(cat + " has more than " + threshold + " views.");
+                } else {
+                    resultText4.setText(cat + " has less than " + threshold + " views.");
+                }
+            } else {
+                resultText4.setText("you did not select a category");
+            }
 
         });
 
@@ -405,7 +436,7 @@ public class GUI extends Application {
         buttons4.setAlignment(Pos.CENTER);
 
         VBox layout5 = new VBox(70);
-        layout5.getChildren().addAll(instruct4, inputs4, buttons4);
+        layout5.getChildren().addAll(instruct4, inputs4, resultText4, buttons4);
         layout5.setAlignment(Pos.CENTER);
 
         scene5 = new Scene(layout5, 900, 600);
