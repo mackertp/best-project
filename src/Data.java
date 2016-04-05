@@ -39,6 +39,7 @@ public class Data {
         private int start;
         private int end;
         private int category;
+        private int threshold;
         private CountDownLatch latch; // used to keep track of how many tasks are still working/queued.
 
         /**
@@ -49,10 +50,23 @@ public class Data {
          * @param latch latch to signal when task is done
          */
         public CountTask(int start, int end, int category, CountDownLatch latch) {
+            this(start, end, category, 1, latch);
+        }
+
+        /**
+         * Creates a new task to count how many users visited a category in a given sublist
+         * @param start starting index (inclusive)
+         * @param end ending index (exclusive)
+         * @param category category to count
+         * @param threshold minimum amount of visits to a page needed for it to be counted
+         * @param latch latch to signal when task is done
+         */
+        public CountTask(int start, int end, int category, int threshold, CountDownLatch latch) {
             this.start = start;
             this.end = end;
             this.category = category;
             this.latch = latch;
+            this.threshold = threshold;
 
             if (this.start > msnbcData.getUsers()) {
                 // if is out of range we should fix it.
@@ -74,7 +88,7 @@ public class Data {
             int count = 0;
             for(int i=start; i<end; i++) {
 
-                if(msnbcData.getCategory(i, category) > 0) {
+                if(msnbcData.getCategory(i, category) >= threshold) {
                     count ++;
                 }
             }
@@ -185,13 +199,25 @@ public class Data {
      * @return the count of uses who have visited category.
      */
     private int countUsersByCategory(int category) throws InterruptedException {
+        return countUsersByCategory(1, category);
+    }
+
+    /**
+     * Using multithreading, count the amount of users who have visited a given category at least once. Used for the
+     * countQuery and countPercentQuery methods.
+     *
+     * @params threshold how many visits to a category must be made for the user to be counted
+     * @param category the category to consider
+     * @return the count of uses who have visited category.
+     */
+    private int countUsersByCategory(int threshold, int category) throws InterruptedException {
         // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
         int dataSubsize = (int) Math.ceil((double) msnbcData.getUsers() / (double) taskCount);
         CountTask[] tasks = new CountTask[taskCount]; // array of created tasks
         CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
         // create the tasks and place them in the pool of tasks
         for (int i = 0; i < taskCount; i++) {
-            CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, countLatch);
+            CountTask newTask = new CountTask(i * dataSubsize, (i + 1) * dataSubsize, category, threshold, countLatch);
             tasks[i] = newTask;
             taskQueue.put(newTask);
         }
@@ -245,6 +271,21 @@ public class Data {
         }
         catch (InterruptedException e){
             return false;
+        }
+    }
+
+    /**
+     * Multithreaded query to calculate the amount of users who have visited a category at least a certain amount of times.
+     * @param threshold how many visits to a category a user must have made to be counted
+     * @param category category to consider
+     * @return number of users who visited category at least threshold times
+     */
+    public int countThresholdQuery(int threshold, int category){
+        try {
+            return countUsersByCategory(threshold, category);
+        }
+        catch (InterruptedException e){
+            return -1;
         }
     }
 }

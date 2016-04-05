@@ -40,7 +40,12 @@ public class DataTest {
     @org.junit.Test
     public void testComparisonQuery() throws Exception {
         // Are there more users who looked at X than Y
-        assertEquals(true, data.compairisonQuery(0, 3));
+        assertEquals(true, data.comparisonQuery(0, 3));
     }
 
+    @org.junit.Test
+    public void testCountThresholdQuery() throws Exception {
+        // How many users viewed X ___ (or more) number of times
+        assertEquals(2, data.countThresholdQuery(5, 0));
+    }
 }
