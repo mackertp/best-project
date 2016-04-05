@@ -232,5 +232,20 @@ public class Data {
             return -1;
         }
     }
+
+    /**
+     * Multithreaded query to calculate if more users looked at category1 than category 2.
+     * @param category1 first category
+     * @param category2 second category
+     * @return true if more users visited category1 than category2
+     */
+    public boolean comparisonQuery(int category1, int category2){
+        try{
+            return countUsersByCategory(category1) > countUsersByCategory(category2);
+        }
+        catch (InterruptedException e){
+            return false;
+        }
+    }
 }
 
