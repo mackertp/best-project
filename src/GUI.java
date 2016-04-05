@@ -216,12 +216,17 @@ public class GUI extends Application {
         catSel.setItems(categories);
         catSel.setPromptText("select a category...");
 
+        TextField numViews = new TextField();
+        numViews.setPromptText("views...");
+        numViews.setMaxWidth(100);
+
+        Label resultText = new Label();
+
         Button returnMain1 = new Button("return");
         returnMain1.setOnAction(e -> {mainStage.setScene(scene1);});
 
         Button answer = new Button("go");
         answer.setOnAction(e -> {
-
             String cat = catSel.getSelectionModel().getSelectedItem().toString();
             int col = -1;
             for (int i=0;i<catNames.length;i++) {
@@ -231,13 +236,25 @@ public class GUI extends Application {
                 }
             }
 
+            int numberViews = 0;
+
+            try{
+                numberViews = Integer.parseInt(numViews.getCharacters().toString());
+            } catch (NumberFormatException k){}
+
+            if (col >= 0){
+                boolean answerQ = data.countQuery(numberViews, col);
+                if (answerQ){
+                    resultText.setText("There were more than " + numberViews + " users who looked at " + cat);
+                } else {
+                    resultText.setText("There were fewer than " + numberViews + " users who looked at " + cat);
+                }
+            } else {
+                resultText.setText("The category selected was not registered");
+            }
         });
 
         Label instruct = new Label("Type in a number of views and then select a category to answer the query");
-
-        TextField numViews = new TextField();
-        numViews.setPromptText("views...");
-        numViews.setMaxWidth(100);
 
         HBox inputs = new HBox(10);
         inputs.getChildren().addAll(numViews, catSel);
@@ -248,7 +265,7 @@ public class GUI extends Application {
         buttons.setAlignment(Pos.CENTER);
 
         VBox layout2 = new VBox(70);
-        layout2.getChildren().addAll(instruct, inputs, buttons);
+        layout2.getChildren().addAll(instruct, inputs, resultText, buttons);
         layout2.setAlignment(Pos.CENTER);
 
         scene2 = new Scene(layout2, 900, 600);
@@ -261,8 +278,24 @@ public class GUI extends Application {
         catSel2.setItems(categories);
         catSel2.setPromptText("select a category...");
 
+        Label resultText2 = new Label();
+
         Button answer2 = new Button("go");
         answer2.setOnAction(e -> {
+            String cat = catSel2.getSelectionModel().getSelectedItem().toString();
+            int col = -1;
+            for (int i=0;i<catNames.length;i++) {
+                if (catNames[i].equals(cat)) {
+                    col = i;
+                    break;
+                }
+            }
+            if (col >= 0){
+                String percentage = String.format("%.6f", data.percentageCountQuery(col));
+                resultText2.setText(cat + " had " + percentage +"% of user's view it.");
+            } else {
+                resultText2.setText("You have not selected a category");
+            }
 
         });
 
@@ -274,7 +307,7 @@ public class GUI extends Application {
         buttons2.setAlignment(Pos.CENTER);
 
         VBox layout3 = new VBox(70);
-        layout3.getChildren().addAll(instruct2, catSel2, buttons2);
+        layout3.getChildren().addAll(instruct2, catSel2, resultText2, buttons2);
         layout3.setAlignment(Pos.CENTER);
 
         scene3 = new Scene(layout3, 900, 600);
@@ -291,9 +324,39 @@ public class GUI extends Application {
         catSel_3.setItems(categories);
         catSel_3.setPromptText("select a category...");
 
+        Label resultText3 = new Label();
+
         Button answer3 = new Button("go");
         answer3.setOnAction(e -> {
+            String cat1 = catSel3.getSelectionModel().getSelectedItem().toString();
+            String cat2 = catSel_3.getSelectionModel().getSelectedItem().toString();
 
+            int col1 = -1;
+            for (int i = 0; i < catNames.length; i++) {
+                if (catNames[i].equals(cat1)) {
+                    col1 = i;
+                    break;
+                }
+            }
+
+            int col2 = -1;
+            for (int i = 0; i < catNames.length; i++) {
+                if (catNames[i].equals(cat2)) {
+                    col2 = i;
+                    break;
+                }
+            }
+
+            if (col1 >= 0 && col2 >=0){
+                boolean ans = data.comparisonQuery(col1, col2);
+                if (ans) {
+                    resultText3.setText(cat1 + " had more viewers than " + cat2);
+                } else{
+                    resultText3.setText(cat2 + " had more viewers than " + cat1);
+                }
+            } else {
+                resultText3.setText("One or both categories not selected");
+            }
         });
 
         Button returnMain3 = new Button("return");
@@ -308,7 +371,7 @@ public class GUI extends Application {
         buttons3.setAlignment(Pos.CENTER);
 
         VBox layout4 = new VBox(70);
-        layout4.getChildren().addAll(instruct3, dropdowns, buttons3);
+        layout4.getChildren().addAll(instruct3, dropdowns, resultText3, buttons3);
         layout4.setAlignment(Pos.CENTER);
 
         scene4 = new Scene(layout4, 900, 600);

@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
  * What percent of users looked at X more than Y (percentageComparisonQuery)
  *
  * @author Robert Bofinger, Preston Mackert
+ *
  */
 
 public class Data {
@@ -119,7 +120,9 @@ public class Data {
      * simply end the program when a window is closed.)
      *
      * @author David Eck
+     *
      */
+
     private class WorkerThread extends Thread {
         WorkerThread() {
             try {
@@ -198,6 +201,7 @@ public class Data {
      * @param category the category to consider
      * @return the count of uses who have visited category.
      */
+
     private int countUsersByCategory(int category) throws InterruptedException {
         return countUsersByCategory(1, category);
     }
@@ -237,6 +241,7 @@ public class Data {
      * @param category the category to consider
      * @return True if amount of visitors to category is >= to userThreshold. False otherwise.
      */
+
     public boolean countQuery(int userThreshold, int category) {
         try {
             return countUsersByCategory(category) > userThreshold;
@@ -251,6 +256,7 @@ public class Data {
      * @param category the category to consider
      * @return a float from 0 to 100 inclusive representing the percent of users who visited category. -1 if error.
      */
+
     public float percentageCountQuery(int category) {
         try {
             return (float)countUsersByCategory(category) / (float)msnbcData.getUsers();
