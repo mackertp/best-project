@@ -421,9 +421,9 @@ public class GUI extends Application {
             if (col >= 0){
                 int count = data.countThresholdQuery(threshold, col);
                 if (count > threshold){
-                    resultText4.setText(cat + " has more than " + threshold + " views.");
+                    resultText4.setText(cat + " had " + count + " user's view it " + threshold + " times.");
                 } else {
-                    resultText4.setText(cat + " has less than " + threshold + " views.");
+                    resultText4.setText(cat + " had " + count + " user's view it " + threshold + " times.");
                 }
             } else {
                 resultText4.setText("you did not select a category");
