@@ -297,7 +297,7 @@ public class GUI extends Application {
                 }
             }
             if (col >= 0){
-                String percentage = String.format("%.6f", data.percentageCountQuery(col));
+                String percentage = String.format("%.3f", data.percentageCountQuery(col));
                 resultText2.setText(cat + " had " + percentage +"% of user's view it.");
             } else {
                 resultText2.setText("You have not selected a category");
@@ -428,7 +428,6 @@ public class GUI extends Application {
             } else {
                 resultText4.setText("you did not select a category");
             }
-
         });
 
         HBox inputs4 = new HBox(10);

@@ -259,7 +259,7 @@ public class Data {
 
     public float percentageCountQuery(int category) {
         try {
-            return (float)countUsersByCategory(category) / (float)msnbcData.getUsers();
+            return ((float)countUsersByCategory(category) / (float)msnbcData.getUsers())*100;
         } catch (InterruptedException e) {
             return -1;
         }
