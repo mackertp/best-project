@@ -32,7 +32,8 @@ public class Data {
     LinkedBlockingQueue<Runnable> taskQueue;
 
     /**
-     * This class defines a task that will count how many users in its sublist that have visited category at least once.
+     * This class defines a task that will count how many users in its subarray that have visited category by atleast
+     * a certain threshold.
      */
     private class CountTask implements Runnable {
 
@@ -81,7 +82,10 @@ public class Data {
             }
         }
 
-        private int getResult() {
+        /**
+         * @return the result of the task
+         */
+        public int getResult() {
             return result;
         }
 
@@ -91,6 +95,64 @@ public class Data {
 
                 if(msnbcData.getCategory(i, category) >= threshold) {
                     count ++;
+                }
+            }
+            result = count;
+            latch.countDown();
+        }
+    }
+
+    /**
+     * This class defines a task that counts how many users in a subarray that have visited one category more than
+     * another category.
+     */
+    private class CompareTask implements Runnable{
+        private int result;
+        private int start;
+        private int end;
+        private int category1;
+        private int category2;
+        private CountDownLatch latch;
+
+        /**
+         * Creates a new task to count how many users have visited category1 more than category2
+         * @param start starting index of subarray
+         * @param end ending index of subarray
+         * @param category1 category to check for more visits
+         * @param category2 category to check visits against
+         * @param latch latch to signal when task is done
+         */
+        public CompareTask (int start, int end, int category1, int category2, CountDownLatch latch) {
+            this.start = start;
+            this.end = end;
+            this.category1 = category1;
+            this.category2 = category2;
+            this.latch = latch;
+
+            if (this.start > msnbcData.getUsers()) {
+                this.start = msnbcData.getUsers() - 1;
+            }
+
+            if (this.end > msnbcData.getUsers()) {
+                this.end = msnbcData.getUsers();
+            }
+        }
+
+        /**
+         * @return The result of the task
+         */
+        public int getResult(){
+            return result;
+        }
+
+        /**
+         * runs the task
+         */
+        public void run(){
+            int count = 0;
+            for(int i=start; i<end; i++){
+                if(msnbcData.getCategory(i, category1) > msnbcData.getCategory(i, category2)){
+                    count++;
                 }
             }
             result = count;
@@ -207,8 +269,7 @@ public class Data {
     }
 
     /**
-     * Using multithreading, count the amount of users who have visited a given category at least once. Used for the
-     * countQuery and countPercentQuery methods.
+     * Using multithreading, count the amount of users who have visited a given category at least once.
      *
      * @param threshold how many visits to a category must be made for the user to be counted
      * @param category the category to consider
@@ -229,6 +290,34 @@ public class Data {
         int sum = 0;
         // sum the results of the tasks
         for (CountTask task : tasks) {
+            sum += task.getResult();
+        }
+        return sum;
+    }
+
+    /**
+     * Using multithreading, count the amount of users who a visited a given category more than another category.
+     *
+     * @param category1 category to consider
+     * @param category2 category to check again
+     * @return the amount of users who have visited category1 more than category2
+     * @throws InterruptedException
+     */
+    private int countUsersByComparison(int category1, int category2) throws  InterruptedException {
+        // dataSubsize is the size of each sublist. We use float division and round up to make sure we don't come up short.
+        int dataSubsize = (int) Math.ceil((double) msnbcData.getUsers() / (double) taskCount);
+        CompareTask[] tasks = new CompareTask[taskCount]; // array of created tasks
+        CountDownLatch countLatch = new CountDownLatch(taskCount); // lets us block until all tasks finish.
+        // create the tasks and place them in the pool of tasks
+        for (int i = 0; i < taskCount; i++) {
+            CompareTask newTask = new CompareTask(i * dataSubsize, (i + 1) * dataSubsize, category1, category2, countLatch);
+            tasks[i] = newTask;
+            taskQueue.put(newTask);
+        }
+        countLatch.await(); // waits for all tasks to finish
+        int sum = 0;
+        // sum the results of the tasks
+        for (CompareTask task : tasks) {
             sum += task.getResult();
         }
         return sum;
@@ -303,14 +392,7 @@ public class Data {
     */
     public float comparePercentageQuery(int category1, int category2){
         try {
-            int users1 = countUsersByCategory(category1);
-            int users2 = countUsersByCategory(category2);
-
-            if (users1 > users2){
-                return (float)(users1-users2)/(users1+users2);
-            } else {
-                return (float)(users2-users1)/(users1+users2);
-            }
+            return (float)countUsersByComparison(category1, category2)/(float)msnbcData.getUsers();
         } catch (InterruptedException e){
             return -1;
         }
