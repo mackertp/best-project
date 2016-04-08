@@ -49,7 +49,7 @@ public class DataTest {
     @org.junit.Test
     public void testComparePercentageQuery() throws Exception {
         // What percent of users looked at X more than Y
-        System.out.println("");
+        System.out.println("Hey Rob hows it going?");
     }
 
 }
