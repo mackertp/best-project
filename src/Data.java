@@ -328,7 +328,7 @@ public class Data {
      *
      * @param userThreshold how many users must have visited category
      * @param category the category to consider
-     * @return True if amount of visitors to category is >= to userThreshold. False otherwise.
+     * @return True if amount of visitors to category is greater than or equal to userThreshold. False otherwise.
      */
 
     public boolean countQuery(int userThreshold, int category) {
