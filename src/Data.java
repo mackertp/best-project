@@ -416,7 +416,7 @@ public class Data {
     */
     public float comparePercentageQuery(int category1, int category2){
         try {
-            return (float)countUsersByComparison(category1, category2)/(float)msnbcData.getUsers();
+            return (float)countUsersByComparison(category1, category2) * 100 /(float)msnbcData.getUsers();
         } catch (InterruptedException e){
             return -1;
         }

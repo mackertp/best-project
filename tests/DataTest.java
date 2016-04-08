@@ -31,7 +31,7 @@ public class DataTest {
     @org.junit.Test
     public void testPercentageCountQuery() throws Exception {
         // What percent of users looked at X
-        assertEquals(12f / 62f, data.percentageCountQuery(0), 0.0f);
+        assertEquals(12f / 62f * 100, data.percentageCountQuery(0), 0.0f);
     }
 
     @org.junit.Test
@@ -49,7 +49,7 @@ public class DataTest {
     @org.junit.Test
     public void testComparePercentageQuery() throws Exception {
         // What percent of users looked at X more than Y
-        assertEquals(13f/62f, data.comparePercentageQuery(5, 8), 0.0f);
+        assertEquals(13f/62f * 100, data.comparePercentageQuery(5, 8), 0.0f);
     }
 
 }
