@@ -211,6 +211,11 @@ public class Data {
         }
     }
 
+    /**
+     * Constructs a new Data class
+     * @param totalUsers the total amount of users in the data file
+     * @param categories the total amount of categories in the data file
+     */
     public Data(int totalUsers, int categories) {
         msnbcData = new DataArray(totalUsers, categories);
         this.totalUsers = totalUsers;
@@ -225,6 +230,11 @@ public class Data {
         }
     }
 
+    /**
+     * Loads data from a file into the class. Use getUsersProcessed() to get the progress of loading.
+     * @param dataFile a file containing formatted data
+     * @throws IOException
+     */
     public void loadData(File dataFile) throws IOException{
         int lineNum = 0;
 
@@ -248,17 +258,23 @@ public class Data {
 
     }
 
+    /**
+     * Used to check on the progress of loading the file
+     * @return the amount of users who have been processed from the file so far
+     */
     public int getUsersProcessed(){
         return usersProcessed;
     }
 
+    /**
+     * @return the total amount of users in the dataset
+     */
     public int getTotalUsers(){
         return totalUsers;
     }
 
     /**
-     * Using multithreading, count the amount of users who have visited a given category at least once. Used for the
-     * countQuery and countPercentQuery methods.
+     * Using multithreading, count the amount of users who have visited a given category at least once.
      *
      * @param category the category to consider
      * @return the count of uses who have visited category.
@@ -269,7 +285,7 @@ public class Data {
     }
 
     /**
-     * Using multithreading, count the amount of users who have visited a given category at least once.
+     * Using multithreading, count the amount of users who have visited a given category by atleast a given threshold.
      *
      * @param threshold how many visits to a category must be made for the user to be counted
      * @param category the category to consider
@@ -324,7 +340,8 @@ public class Data {
     }
 
     /**
-     * Multithreaded query to tell if more than userThreshold users visited category
+     * Multithreaded query to tell if more than userThreshold users visited category.
+     * Relates to: Are there more than ____ users who looked at X?
      *
      * @param userThreshold how many users must have visited category
      * @param category the category to consider
@@ -341,6 +358,7 @@ public class Data {
 
     /**
      * Multithreaded query to calculate the percentage of users who visited a category.
+     * Relates to: What percent of users looked at X?
      *
      * @param category the category to consider
      * @return a float from 0 to 100 inclusive representing the percent of users who visited category. -1 if error.
@@ -356,6 +374,8 @@ public class Data {
 
     /**
      * Multithreaded query to calculate if more users looked at category1 than category 2.
+     * Relates to: Are there more users who looked at X than Y?
+     *
      * @param category1 first category
      * @param category2 second category
      * @return true if more users visited category1 than category2
@@ -371,6 +391,8 @@ public class Data {
 
     /**
      * Multithreaded query to calculate the amount of users who have visited a category at least a certain amount of times.
+     * Relates to: How many users viewed X ___ (or more) number of times?
+     *
      * @param threshold how many visits to a category a user must have made to be counted
      * @param category category to consider
      * @return number of users who visited category at least threshold times
@@ -386,6 +408,8 @@ public class Data {
 
     /**
      * Multithreaded query to calculate the percent of users that viewed one category more than another category.
+     * Relates to: What percent of users looked at X more than Y?
+     *
      * @param category1 the first category to consider
      * @param category2 the second category to consider
      * @return percentage of users who visited which category more.
